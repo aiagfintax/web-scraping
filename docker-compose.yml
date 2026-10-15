@@ -1,0 +1,18 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-0}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+    volumes:
+      - scraper_data:/data   # SQLite database + generated Excel files
+    shm_size: "1gb"          # Chromium crashes with Docker's default 64MB /dev/shm
+    restart: unless-stopped
+
+volumes:
+  scraper_data:

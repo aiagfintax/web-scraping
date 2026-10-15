@@ -1,0 +1,39 @@
+{% extends "scraping/base.html" %}
+{% block title %}Run {{ run.pk }} · Web Scraper{% endblock %}
+{% block content %}
+<section class="card">
+  <p><a href="{% url 'index' %}">&larr; New scrape</a></p>
+  <h1>Run {{ run.pk }} <span class="badge {{ run.status }}">{{ run.get_status_display }}</span></h1>
+  <dl class="meta">
+    <dt>Fields</dt><dd><code>{{ run.fields }}</code></dd>
+    <dt>URLs</dt><dd>{% for u in run.url_list %}<div class="clip">{{ u }}</div>{% endfor %}</dd>
+    <dt>Rows</dt><dd>{{ run.row_count }}</dd>
+  </dl>
+  {% if run.excel_file %}
+    <a class="button" href="{% url 'download' run.pk %}">Download Excel</a>
+  {% endif %}
+</section>
+
+{% if run.preview %}
+<section class="card">
+  <h2>Preview <small>first {{ run.preview|length }} rows</small></h2>
+  <div class="scroll">
+    <table class="grid">
+      <thead><tr>{% for c in run.preview_columns %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+      <tbody>
+      {% for row in run.preview_rows %}
+        <tr>{% for v in row %}<td>{{ v }}</td>{% endfor %}</tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+{% if run.log %}
+<section class="card">
+  <h2>Log</h2>
+  <pre class="log">{{ run.log }}</pre>
+</section>
+{% endif %}
+{% endblock %}

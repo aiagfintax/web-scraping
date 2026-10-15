@@ -1,0 +1,71 @@
+{% extends "scraping/base.html" %}
+{% block content %}
+<section class="card">
+  <h1>New scrape</h1>
+  <form method="post" class="form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="error">{{ form.non_field_errors }}</div>{% endif %}
+
+    <label for="{{ form.urls.id_for_label }}">Website URLs <small>one per line</small></label>
+    {{ form.urls }}
+    {% if form.urls.errors %}<div class="error">{{ form.urls.errors }}</div>{% endif %}
+
+    <label for="{{ form.fields.id_for_label }}">Fields to collect <small>comma separated</small></label>
+    {{ form.fields }}
+    {% if form.fields.errors %}<div class="error">{{ form.fields.errors }}</div>{% endif %}
+
+    <details class="help">
+      <summary>How to type fields</summary>
+      <ul>
+        <li><b>Ready-made:</b> <code>emails</code>, <code>phones</code>, <code>title</code>, <code>description</code>, <code>headings</code>, <code>address</code>, <code>prices</code>, <code>links</code>, <code>images</code>, <code>social</code>, <code>text</code>, <code>tables</code> (each HTML table gets its own sheet).</li>
+        <li><b>Any word</b>, e.g. <code>name</code> or <code>rating</code>: the scraper looks for elements whose class, id or itemprop contains that word.</li>
+        <li><b>Exact selector:</b> <code>label=css selector</code>, e.g. <code>company=h2.title</code>. Add <code>@attr</code> for an attribute: <code>website=a.visit@href</code>.</li>
+      </ul>
+    </details>
+
+    <details class="help">
+      <summary>Advanced: lists and multiple pages</summary>
+      <label for="{{ form.item_selector.id_for_label }}">Repeating item selector <small>one Excel row per match</small></label>
+      {{ form.item_selector }}
+      <label for="{{ form.next_selector.id_for_label }}">"Next page" link selector</label>
+      {{ form.next_selector }}
+      <div class="row">
+        <div>
+          <label for="{{ form.max_pages.id_for_label }}">Max pages per URL <small>1 to 20</small></label>
+          {{ form.max_pages }}
+        </div>
+        <div>
+          <label for="{{ form.mode.id_for_label }}">Fetch mode</label>
+          {{ form.mode }}
+        </div>
+      </div>
+    </details>
+
+    <button type="submit">Scrape and build Excel</button>
+    <p class="hint">The page waits while the scrape runs. JavaScript-heavy sites take longer.</p>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Recent runs</h2>
+  {% if runs %}
+  <table class="grid">
+    <thead><tr><th>#</th><th>When</th><th>Fields</th><th>Status</th><th>Rows</th><th></th></tr></thead>
+    <tbody>
+    {% for r in runs %}
+      <tr>
+        <td><a href="{% url 'run_detail' r.pk %}">{{ r.pk }}</a></td>
+        <td>{{ r.created_at|date:"M j, H:i" }}</td>
+        <td class="clip">{{ r.fields }}</td>
+        <td><span class="badge {{ r.status }}">{{ r.get_status_display }}</span></td>
+        <td>{{ r.row_count }}</td>
+        <td>{% if r.excel_file %}<a href="{% url 'download' r.pk %}">Excel</a>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="hint">No runs yet.</p>
+  {% endif %}
+</section>
+{% endblock %}
